@@ -16,6 +16,13 @@ import vistir
 import warnings
 import six
 
+from pytz import country_timezones
+from tzlocal import get_localzone
+import holidays
+from datetime import date
+from datetime import datetime
+from dateutil.easter import easter
+
 import urllib3.util as urllib3_util
 
 from .cmdparse import Script
@@ -68,23 +75,45 @@ BAD_PACKAGES = (
     "wheel",
 )
 
+EMOJI_MAP = {
+     "New Year's Day": "🎉", # party popper Unicode: U+1F389, UTF-8: F0 9F 8E 89",
+     #'Martin Luther King, Jr. Day',
+     "Washington's Birthday": "🎂", # birthday cake Unicode: U+1F382, UTF-8: F0 9F 8E 82,
+     #'Memorial Day',
+     'Independence Day':"🎇", # firework sparkler Unicode: U+1F387, UTF-8: F0 9F 8E 87,
+     #'Labor Day',
+     #'Columbus Day',
+     #'Veterans Day',
+     #'Veterans Day (Observed)',
+     'Thanksgiving': "🦃",  # turkey Unicode: U+1F983, UTF-8: F0 9F A6 83,
+     'Christmas Day': "🎄",  # Christmas tree Unicode: U+1F384, UTF-8: F0 9F 8E 84
+     }
+
+def get_emoji_for_date(d, default='🐍'):
+    zone_name = get_localzone().zone
+    for cc, zns in country_timezones.items():
+      if zone_name in zns:
+        break
+    country_holidays = holidays.CountryHoliday(country=cc)
+    holiday_name = country_holidays.get(d)
+
+    emoji = EMOJI_MAP.get(holiday_name, default)
+    
+    # last chance for easter, halloween
+    if d == easter(d.year):
+        emoji = "🥚"  # egg Unicode: U+1F95A, UTF-8: F0 9F A5 9A
+    elif d == date(d.year, 10, 31):
+        emoji = "🎃"  # jack-o-lantern Unicode: U+1F383, UTF-8: F0 9F 8E 83
+    
+    return emoji
+
 FIRST_PACKAGES = ("cython",)
 # Are we using the default Python?
 USING_DEFAULT_PYTHON = True
 if not PIPENV_HIDE_EMOJIS:
     now = time.localtime()
-    # Halloween easter-egg.
-    if ((now.tm_mon == 10) and (now.tm_mday == 30)) or (
-        (now.tm_mon == 10) and (now.tm_mday == 31)
-    ):
-        INSTALL_LABEL = "🎃   "
-    # Christmas easter-egg.
-    elif ((now.tm_mon == 12) and (now.tm_mday == 24)) or (
-        (now.tm_mon == 12) and (now.tm_mday == 25)
-    ):
-        INSTALL_LABEL = "🎅   "
-    else:
-        INSTALL_LABEL = "🐍   "
+    intall_label_emoji = get_emoji_for_date(datetime.today())
+    INSTALL_LABEL = install_label_emoji + "   "
     INSTALL_LABEL2 = crayons.normal("☤  ", bold=True)
     STARTING_LABEL = "    "
 else:
