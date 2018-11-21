@@ -94,7 +94,12 @@ def get_emoji_for_date(d, default='🐍'):
     for cc, zns in country_timezones.items():
       if zone_name in zns:
         break
-    country_holidays = holidays.CountryHoliday(country=cc)
+    try:
+        country_holidays = holidays.CountryHoliday(country=cc)
+    except KeyError as unsupported:
+        country_holidays = holidays.CountryHoliday(country='US')
+    except TypeError as needs_province:
+        country_holidays = holidays.CountryHoliday(country='US')
     holiday_name = country_holidays.get(d)
 
     emoji = EMOJI_MAP.get(holiday_name, default)
