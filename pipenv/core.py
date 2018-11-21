@@ -112,7 +112,7 @@ FIRST_PACKAGES = ("cython",)
 USING_DEFAULT_PYTHON = True
 if not PIPENV_HIDE_EMOJIS:
     now = time.localtime()
-    intall_label_emoji = get_emoji_for_date(datetime.today())
+    install_label_emoji = get_emoji_for_date(datetime.today())
     INSTALL_LABEL = install_label_emoji + "   "
     INSTALL_LABEL2 = crayons.normal("☤  ", bold=True)
     STARTING_LABEL = "    "
